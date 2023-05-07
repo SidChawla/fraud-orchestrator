@@ -7,8 +7,11 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.frauddetector.AmazonFraudDetector;
 import com.amazonaws.services.frauddetector.AmazonFraudDetectorClientBuilder;
 import com.amazonaws.services.frauddetector.model.Entity;
@@ -16,6 +19,10 @@ import com.amazonaws.services.frauddetector.model.GetEventPredictionRequest;
 import com.amazonaws.services.frauddetector.model.GetEventPredictionResult;
 import com.amazonaws.services.frauddetector.model.ModelScores;
 import com.amazonaws.services.frauddetector.model.RuleResult;
+import com.amazonaws.services.lambda.AWSLambda;
+import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
+import com.amazonaws.services.lambda.model.InvokeRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fraudorchestrator.model.RiskTransactionRequest;
 import com.fraudorchestrator.model.RiskTransactionResponse;
 
@@ -24,12 +31,20 @@ public class FraudDetectorService {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(FraudDetectorService.class);
 
+	@Autowired
+	private AWSStaticCredentialsProvider aWSStaticCredentialsProvider;
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	public RiskTransactionResponse evaluateRisk(boolean fraudDetector, RiskTransactionRequest riskRequest) {
 		RiskTransactionResponse riskResponse = new RiskTransactionResponse();
+		Regions region = Regions.fromName("us-east-1");
 		if (fraudDetector) {
 			try {
-
-				AmazonFraudDetector awsFrausDetector = AmazonFraudDetectorClientBuilder.defaultClient();
+				AmazonFraudDetector awsFrausDetector = AmazonFraudDetectorClientBuilder.standard()
+						.withCredentials(aWSStaticCredentialsProvider).withRegion(region).build();
+				
 				GetEventPredictionRequest eventPredictionRequest = new GetEventPredictionRequest();
 				eventPredictionRequest.setDetectorId("techevent_frauddetector");
 				eventPredictionRequest.setDetectorVersionId("1");
@@ -61,7 +76,8 @@ public class FraudDetectorService {
 					List<ModelScores> modelScoresList = eventPredictionResult.getModelScores();
 					for (ModelScores modelScores : modelScoresList) {
 						LOGGER.info("###### modelScores.getScores() === " + modelScores.getScores());
-						riskResponse.setRiskScore(modelScores.getScores().get("frauddetection_model1_insightscore").toString());
+						riskResponse.setRiskScore(
+								modelScores.getScores().get("frauddetection_model1_insightscore").toString());
 					}
 
 					List<RuleResult> ruleResults = eventPredictionResult.getRuleResults();
@@ -73,12 +89,23 @@ public class FraudDetectorService {
 				}
 
 			} catch (Exception e) {
-				LOGGER.error("Exception occured ::: ", e);
+				LOGGER.error("Exception occured in FraudDetector part ::: ", e);
 			}
-
 		}
-		
-		
+
+		LOGGER.info("About to invoke lambda...");
+		try {
+			String responseJson = objectMapper.writeValueAsString(riskResponse);
+
+			AWSLambdaClientBuilder builder = AWSLambdaClientBuilder.standard()
+					.withCredentials(aWSStaticCredentialsProvider).withRegion(region);
+			AWSLambda client = builder.build();
+			InvokeRequest req = new InvokeRequest().withFunctionName("event-manager").withPayload(responseJson);
+			client.invoke(req);
+			LOGGER.info("Invoked lambda successfully...");
+		} catch (Exception e) {
+			LOGGER.error("Exception occured in Lamda part :::", e);
+		}
 		return riskResponse;
 	}
 }

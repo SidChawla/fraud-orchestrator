@@ -15,8 +15,8 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	
-	// https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-frauddetector
-implementation group: 'com.amazonaws', name: 'aws-java-sdk-frauddetector', version: '1.12.227'
+	implementation group: 'com.amazonaws', name: 'aws-java-sdk-frauddetector', version: '1.12.227'
+	implementation group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: '1.11.411'
 	
 	
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
