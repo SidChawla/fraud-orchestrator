@@ -25,6 +25,7 @@ import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fraudorchestrator.model.RiskTransactionRequest;
 import com.fraudorchestrator.model.RiskTransactionResponse;
+import com.fraudorchestrator.util.EncryptDecryptUtil;
 
 @Service
 public class FraudDetectorService {
@@ -33,7 +34,7 @@ public class FraudDetectorService {
 
 	@Autowired
 	private AWSStaticCredentialsProvider aWSStaticCredentialsProvider;
-
+	
 	@Autowired
 	private ObjectMapper objectMapper;
 

@@ -10,14 +10,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Configuration
 public class AwsConfiguration {
 
-	private String AWS_ACCESS_KEY_ID = "AKIA4U35JFXWKXTCNI6Q";
-	private String AWS_SECRET_ACCESS_KEY = "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";
+	private String ENCRYPT_KEY = "GZYPDxsOq7XNeoNDlMDVSfWUYQD6BIAyuoz7HwazCKU=";
+	private String ENCRYPT_SECRET = "AZ/YBf/cLZgPbx2kFRAYRMDmtWwFUNSqESY9JW5I8nlkw4K/oxp6Fmy2pFnbm4zS";
 
 	@Bean
 	public AWSStaticCredentialsProvider amazonAWSCredentialsProviderDevelopment() {
-		return new AWSStaticCredentialsProvider(new BasicAWSCredentials(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY));
+		return new AWSStaticCredentialsProvider(new BasicAWSCredentials(ENCRYPT_KEY, ENCRYPT_SECRET));
 	}
-	
+
 	@Bean
 	public ObjectMapper getObjectMapper() {
 		return new ObjectMapper();
