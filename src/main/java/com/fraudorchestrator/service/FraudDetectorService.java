@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.kafka.clients.producer.Callback;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +23,9 @@ import com.amazonaws.services.frauddetector.model.GetEventPredictionRequest;
 import com.amazonaws.services.frauddetector.model.GetEventPredictionResult;
 import com.amazonaws.services.frauddetector.model.ModelScores;
 import com.amazonaws.services.frauddetector.model.RuleResult;
-import com.amazonaws.services.lambda.AWSLambda;
-import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
-import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fraudorchestrator.model.RiskTransactionRequest;
 import com.fraudorchestrator.model.RiskTransactionResponse;
-import com.fraudorchestrator.util.EncryptDecryptUtil;
 
 @Service
 public class FraudDetectorService {
@@ -34,9 +34,12 @@ public class FraudDetectorService {
 
 	@Autowired
 	private AWSStaticCredentialsProvider aWSStaticCredentialsProvider;
-	
+
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private Producer<String, String> kafkaProducer;
 
 	public RiskTransactionResponse evaluateRisk(boolean fraudDetector, RiskTransactionRequest riskRequest) {
 		RiskTransactionResponse riskResponse = new RiskTransactionResponse();
@@ -45,7 +48,7 @@ public class FraudDetectorService {
 			try {
 				AmazonFraudDetector awsFrausDetector = AmazonFraudDetectorClientBuilder.standard()
 						.withCredentials(aWSStaticCredentialsProvider).withRegion(region).build();
-				
+
 				GetEventPredictionRequest eventPredictionRequest = new GetEventPredictionRequest();
 				eventPredictionRequest.setDetectorId("techevent_frauddetector");
 				eventPredictionRequest.setDetectorVersionId("1");
@@ -94,16 +97,28 @@ public class FraudDetectorService {
 			}
 		}
 
-		LOGGER.info("About to invoke lambda...");
+		LOGGER.info("About to invoke MSK...");
 		try {
 			String responseJson = objectMapper.writeValueAsString(riskResponse);
+			
+			kafkaProducer.send(new ProducerRecord<>("fraud-detector-topic", responseJson), new Callback() {
+	            @Override
+	            public void onCompletion(RecordMetadata metadata, Exception exception) {
+	                if (exception == null) {
+	                    LOGGER.info("Message sent to partition %d, offset %d%n", metadata.partition(), metadata.offset());
+	                } else {
+	                    LOGGER.error("Failed to send message: ", exception);
+	                }
+	            }
+	        });
 
-			AWSLambdaClientBuilder builder = AWSLambdaClientBuilder.standard()
-					.withCredentials(aWSStaticCredentialsProvider).withRegion(region);
-			AWSLambda client = builder.build();
-			InvokeRequest req = new InvokeRequest().withFunctionName("event-manager").withPayload(responseJson);
-			client.invoke(req);
-			LOGGER.info("Invoked lambda successfully...");
+//			AWSLambdaClientBuilder builder = AWSLambdaClientBuilder.standard()
+//					.withCredentials(aWSStaticCredentialsProvider).withRegion(region);
+//			AWSLambda client = builder.build();
+//			InvokeRequest req = new InvokeRequest().withFunctionName("event-manager").withPayload(responseJson);
+//			client.invoke(req);
+
+			LOGGER.info("Invoked MSK successfully...");
 		} catch (Exception e) {
 			LOGGER.error("Exception occured in Lamda part :::", e);
 		}

@@ -15,7 +15,8 @@ public class AwsConfiguration {
 
 	@Bean
 	public AWSStaticCredentialsProvider amazonAWSCredentialsProviderDevelopment() {
-		return new AWSStaticCredentialsProvider(new BasicAWSCredentials(ENCRYPT_KEY, ENCRYPT_SECRET));
+		return new AWSStaticCredentialsProvider(new BasicAWSCredentials(EncryptDecryptUtil.decrypt(ENCRYPT_KEY),
+				EncryptDecryptUtil.decrypt(ENCRYPT_SECRET)));
 	}
 
 	@Bean
