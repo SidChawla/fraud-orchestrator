@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "This template will create a rules-only detector for catching specific fraud cases."
+Resources:
+  # Detector
+  techeventfrauddetector:
+    Type: AWS::FraudDetector::Detector
+    Properties:
+      DetectorId: 'techeventfrauddetector'
+      DetectorVersionStatus: 'ACTIVE'
+      RuleExecutionMode: 'ALL_MATCHED'
+      Description: 'Detector for fraud detection- Tech POC. '
+      AssociatedModels:
+        - Arn: 'arn:aws:frauddetector:us-east-1:869456752108:model-version/ONLINE_FRAUD_INSIGHTS/frauddetection_model1/1.0'
+      EventType:
+        Inline: false
+        Name: 'frauddetection_demo'
+        Arn: 'arn:aws:frauddetector:us-east-1:869456752108:event-type/frauddetection_demo'
+      Rules:
+        - RuleId: 'fraud_rule'
+          DetectorId: 'techeventfrauddetector'
+          Expression: '$frauddetection_model1_insightscore > 900'
+          Language: 'DETECTORPL'
+          Outcomes:
+            - Inline: false
+              Name: 'risk-high'
+              Arn: 'arn:aws:frauddetector:us-east-1:869456752108:outcome/risk-high'
+        - RuleId: 'legit_rule'
+          DetectorId: 'techeventfrauddetector'
+          Expression: '$frauddetection_model1_insightscore < 700'
+          Language: 'DETECTORPL'
+          Outcomes:
+            - Inline: false
+              Name: 'risk-low'
+              Arn: 'arn:aws:frauddetector:us-east-1:869456752108:outcome/risk-low'
+        - RuleId: 'review_rule'
+          DetectorId: 'techeventfrauddetector'
+          Expression: '$frauddetection_model1_insightscore >= 700 and $frauddetection_model1_insightscore <= 900'
+          Language: 'DETECTORPL'
+          Outcomes:
+            - Inline: false
+              Name: 'risk-medium'
+              Arn: 'arn:aws:frauddetector:us-east-1:869456752108:outcome/risk-medium'
+        
+# Outputs
+Outputs:
+  techeventfrauddetectorArn:
+    Value: !Ref techeventfrauddetector
+    Export:
+      Name: 'techeventfrauddetectorArn'
+

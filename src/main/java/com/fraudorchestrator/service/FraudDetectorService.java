@@ -49,7 +49,7 @@ public class FraudDetectorService {
 						.withCredentials(aWSStaticCredentialsProvider).withRegion(region).build();
 
 				GetEventPredictionRequest eventPredictionRequest = new GetEventPredictionRequest();
-				eventPredictionRequest.setDetectorId("techevent_frauddetector");
+				eventPredictionRequest.setDetectorId("techeventfrauddetector");
 				eventPredictionRequest.setDetectorVersionId("1");
 				Entity e = new Entity();
 				e.setEntityType("customer_transaction");
