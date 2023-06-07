@@ -95,11 +95,22 @@ public class FraudDetectorService {
 					riskResponse.setEmail(riskRequest.getEmail());
 					riskResponse.setIpAdrress(riskRequest.getIpAdrress());
 					riskResponse.setPhoneNumber(riskRequest.getPhoneNumber());
+					riskResponse.setUserAgent(riskRequest.getUserAgent());
 				}
 
 			} catch (Exception e) {
 				LOGGER.error("Exception occured in FraudDetector part ::: ", e);
 			}
+		} else {
+			riskResponse.setBillingAddress("Mayur Vihar");
+			riskResponse.setBillingPostal("110096");
+			riskResponse.setBillingState("DELHI");
+			riskResponse.setEmail("sidchawla1990@gmail.com");
+			riskResponse.setIpAdrress("192.168.1.1");
+			riskResponse.setPhoneNumber("9711906826");
+			riskResponse.setUserAgent("Lenovo i5 Laptop");
+			riskResponse.setRiskScore("299");
+			riskResponse.setRiskOutcome("risk-low");
 		}
 
 		LOGGER.info("About to invoke Lambda...");
