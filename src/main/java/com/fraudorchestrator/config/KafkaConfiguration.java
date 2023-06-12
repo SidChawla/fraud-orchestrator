@@ -1,3 +1,4 @@
+package com.fraudorchestrator.config;
 //package com.fraudorchestrator.util;
 //
 //import java.util.Properties;

@@ -19,6 +19,11 @@ public class RiskController {
 	@Autowired
 	private FraudDetectorService fraudDetectorService;
 
+	@GetMapping(path = "/ping")
+	public String ping() {
+		return "Ram Ram ji...";
+	}
+
 	@PostMapping(path = "/evaluate-risk")
 	public RiskTransactionResponse evaluateRisk(
 			@RequestHeader(value = "fraudDetector", required = false, defaultValue = "false") boolean fraudDetector,
@@ -26,11 +31,6 @@ public class RiskController {
 
 		return fraudDetectorService.evaluateRisk(fraudDetector, riskRequest);
 
-	}
-
-	@GetMapping(path = "/ping")
-	public String ping() {
-		return "Ram Ram ji.";
 	}
 
 }
