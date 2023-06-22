@@ -1,5 +1,10 @@
 package com.fraudorchestrator.controller;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,12 +21,22 @@ import com.fraudorchestrator.service.FraudDetectorService;
 @RequestMapping("/fraudorchestrator")
 public class RiskController {
 
+	private static Logger LOGGER = LoggerFactory.getLogger(FraudDetectorService.class);
+
 	@Autowired
 	private FraudDetectorService fraudDetectorService;
 
 	@GetMapping(path = "/ping")
 	public String ping() {
-		return "Ram Ram ji...";
+		String hostAddress = null;
+		LOGGER.info("Inside /ping endpoint.");
+		try {
+			hostAddress = InetAddress.getLocalHost().getHostAddress();
+			LOGGER.info("hostAddress = " + hostAddress);
+		} catch (UnknownHostException e) {
+			LOGGER.error("UnknownHostException occured.", e);
+		}
+		return ("Ram Ram ji..." + hostAddress);
 	}
 
 	@PostMapping(path = "/evaluate-risk")
@@ -29,6 +44,7 @@ public class RiskController {
 			@RequestHeader(value = "fraudDetector", required = false, defaultValue = "false") boolean fraudDetector,
 			@RequestBody RiskTransactionRequest riskRequest) {
 
+		LOGGER.info("Inside /evaluate-risk endpoint.");
 		return fraudDetectorService.evaluateRisk(fraudDetector, riskRequest);
 
 	}
