@@ -17,6 +17,7 @@ dependencies {
 	
 	implementation group: 'com.amazonaws', name: 'aws-java-sdk-frauddetector', version: '1.12.227'
 	implementation group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: '1.11.411'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.apache.kafka:kafka-clients:3.3.2'
 	implementation 'software.amazon.awssdk:kafka:2.20.61'
     implementation 'software.amazon.awssdk:auth:2.20.61'

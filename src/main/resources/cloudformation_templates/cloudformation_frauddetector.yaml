@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "This template will create a rules-only detector for catching specific fraud cases."
+Description: "This template will create a fraud detector for catching specific fraud cases."
 Resources:
   # Detector
   techeventfrauddetector:

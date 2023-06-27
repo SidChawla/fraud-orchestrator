@@ -1,13 +1,24 @@
 package com.fraudorchestrator.model;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+
 public class RiskTransactionRequest {
 
+	@NotBlank
 	private String ipAdrress;
+	@NotBlank
+	@Email
 	private String email;
+	@NotBlank
 	private String billingState;
+	@NotBlank
 	private String userAgent;
+	@NotBlank
 	private String billingPostal;
+	@NotBlank
 	private String phoneNumber;
+	@NotBlank
 	private String billingAddress;
 
 	public String getIpAdrress() {

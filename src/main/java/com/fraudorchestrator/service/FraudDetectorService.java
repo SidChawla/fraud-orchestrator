@@ -74,27 +74,11 @@ public class FraudDetectorService {
 			createDummyRiskResponse(riskResponse);
 		}
 
-		
 		try {
 			String responseJson = objectMapper.writeValueAsString(riskResponse);
-//			
-//			kafkaProducer.send(new ProducerRecord<>("fraud-detector-topic", responseJson), new Callback() {
-//	            @Override
-//	            public void onCompletion(RecordMetadata metadata, Exception exception) {
-//	                if (exception == null) {
-//	                    LOGGER.info("Message sent to partition %d, offset %d%n", metadata.partition(), metadata.offset());
-//	                } else {
-//	                    LOGGER.error("Failed to send message: ", exception);
-//	                }
-//	            }
-//	        });
 
 			LOGGER.info("About to invoke Lambda...");
-			//Invoking Lambda function asynchronously.
-//			InvokeAsyncRequest asyncReq = new InvokeAsyncRequest().withFunctionName(Constants.LAMBDA_FUNCTION_NAME)
-//					.withInvokeArgs(responseJson);
-//
-//			awsLambda.invokeAsync(asyncReq);
+			// Invoking Lambda function asynchronously.
 			awsLambda.invoke(new InvokeRequest().withFunctionName(Constants.LAMBDA_FUNCTION_NAME)
 					.withInvocationType(InvocationType.Event) // asynchronous
 					.withPayload(responseJson));
@@ -110,9 +94,11 @@ public class FraudDetectorService {
 		riskResponse.setBillingAddress(riskRequest.getBillingAddress());
 		riskResponse.setBillingPostal(riskRequest.getBillingPostal());
 		riskResponse.setBillingState(riskRequest.getBillingState());
-		riskResponse.setEmail(riskRequest.getEmail());
 		riskResponse.setIpAdrress(riskRequest.getIpAdrress());
-		riskResponse.setPhoneNumber(riskRequest.getPhoneNumber());
+		// masking email.
+		riskResponse.setEmail(riskRequest.getEmail().replaceAll("(^[^@]{3}|(?!^)\\G)[^@]", "$1*"));
+		// masking phoneNumber.
+		riskResponse.setPhoneNumber(riskRequest.getPhoneNumber().replaceAll("\\d(?=\\d{4})", "*"));
 		riskResponse.setUserAgent(riskRequest.getUserAgent());
 	}
 

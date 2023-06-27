@@ -3,6 +3,8 @@ package com.fraudorchestrator.controller;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +44,7 @@ public class RiskController {
 	@PostMapping(path = "/evaluate-risk")
 	public RiskTransactionResponse evaluateRisk(
 			@RequestHeader(value = "fraudDetector", required = false, defaultValue = "false") boolean fraudDetector,
-			@RequestBody RiskTransactionRequest riskRequest) {
+			@RequestBody @Valid RiskTransactionRequest riskRequest) {
 
 		LOGGER.info("Inside /evaluate-risk endpoint.");
 		return fraudDetectorService.evaluateRisk(fraudDetector, riskRequest);
