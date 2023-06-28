@@ -98,7 +98,7 @@ public class FraudDetectorService {
 		// masking email.
 		riskResponse.setEmail(riskRequest.getEmail().replaceAll("(^[^@]{3}|(?!^)\\G)[^@]", "$1*"));
 		// masking phoneNumber.
-		riskResponse.setPhoneNumber(riskRequest.getPhoneNumber().replaceAll("\\d(?=\\d{4})", "*"));
+		riskResponse.setPhoneNumber(riskRequest.getPhoneNumber().replaceAll(".(?=.{4})", "*"));
 		riskResponse.setUserAgent(riskRequest.getUserAgent());
 	}
 
